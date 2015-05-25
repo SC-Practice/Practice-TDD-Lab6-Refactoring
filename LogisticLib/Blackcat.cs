@@ -2,6 +2,8 @@
 {
     public class Blackcat : IShipping
     {
+        public string Name { get { return "黑貓"; } }
+
         public void CalculateFee(ShippingProduct product)
         {
             var weight = product.Weight;

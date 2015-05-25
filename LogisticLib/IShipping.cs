@@ -8,5 +8,7 @@ namespace LogisticLib
     public interface IShipping
     {
         void CalculateFee(ShippingProduct product);
+
+        string Name { get; }
     }
 }

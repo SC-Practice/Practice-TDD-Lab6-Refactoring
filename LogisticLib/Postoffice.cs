@@ -2,6 +2,11 @@
 {
     public class Postoffice : IShipping
     {
+        public string Name
+        {
+            get { return "新竹貨運"; }
+        }
+
         public void CalculateFee(ShippingProduct product)
         {
             var weight = product.Weight;
