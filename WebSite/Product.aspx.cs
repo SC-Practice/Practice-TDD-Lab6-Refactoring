@@ -6,7 +6,8 @@ using System;
 /* 2.建立 ViewModel 類別, 增加 .aspx.cs & .aspx 之間的彈性 -> run test: green! Complexity:14 */
 /* 3.抽出計算邏輯(private metohd Ctrl+R, Ctrl+M), 降低複雜度  -> run test: green! Complexity:6 */
 /* 4.方法改成建立各運費類別 (名詞為類別名稱, 動詞為方法名稱), 建立 LogisticLib 邏輯層專案 -> run test: green! Complexity:6 */
-/* 5.抽出介面, 相同的事情就可以抽出判斷, 下一步便能做 DI, 達到切開主程式與運算邏輯的相依 */
+/* 5.再抽出共用方法的時候就應該要做 unit test, Timely, 及時跟上 Production code, 補上! -> run all test: green! */
+/* 6.抽出介面, 相同的事情就可以抽出判斷, 下一步便能做 DI, 達到切開主程式與運算邏輯的相依 */
 
 public partial class Product : System.Web.UI.Page
 {

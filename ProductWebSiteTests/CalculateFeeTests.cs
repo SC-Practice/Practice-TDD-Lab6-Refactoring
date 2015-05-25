@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using LogisticLib;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
@@ -9,6 +10,85 @@ namespace ProductWebSiteTests
 {
     [TestClass]
     public class CalculateFeeTests
+    {
+        [TestMethod]
+        public void BlackcatTests()
+        {
+            //arrange
+            var target = new Blackcat();
+            var product = new ShippingProduct
+            {
+                Name = "book",
+                Weight = 10,
+                Size = new Size
+                {
+                    Length = 30,
+                    Height = 10,
+                    Width = 20
+                }
+            };
+
+            //act
+            target.CalculateFee(product);
+
+            //asert
+            var expected = 200;
+            Assert.AreEqual(product.ShippingFee, expected);
+        }
+
+        [TestMethod]
+        public void HsinChuTests()
+        {
+            //arrange
+            var target = new HsinChu();
+            var product = new ShippingProduct
+            {
+                Name = "book",
+                Weight = 10,
+                Size = new Size
+                {
+                    Length = 30,
+                    Height = 10,
+                    Width = 20
+                }
+            };
+
+            //act
+            target.CalculateFee(product);
+
+            //asert
+            var expected = 254.16;
+            Assert.AreEqual(product.ShippingFee, expected);
+        }
+
+        [TestMethod]
+        public void PostofficeTests()
+        {
+            //arrange
+            var target = new Postoffice();
+            var product = new ShippingProduct
+            {
+                Name = "book",
+                Weight = 10,
+                Size = new Size
+                {
+                    Length = 30,
+                    Height = 10,
+                    Width = 20
+                }
+            };
+
+            //act
+            target.CalculateFee(product);
+
+            //asert
+            var expected = 180;
+            Assert.AreEqual(product.ShippingFee, expected);
+        }
+    }
+
+    [TestClass]
+    public class CalculateFeeWebTests
     {
         private IWebDriver driver;
         private StringBuilder verificationErrors;
