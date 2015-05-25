@@ -1,0 +1,66 @@
+重構-擷取介面
+
+1. 定義一個 IShipper 的介面，讓黑貓、新竹貨運、郵局這些貨運商，實作這個介面
+先將 var blackcat = new Blackcat(); 改成
+IShipper blackcat = new Blackcat();
+
+一樣，在IShipper紅線底下，選擇產生，產生新類型，類型選擇 interface，輸出選擇 LogisticLib。
+
+在 new Blackcat()的紅線，移至定義，讓黑貓類別實作 IShipper 介面
+public class Blackcat : IShipper
+
+在blackcat.CalculateFee(product);的紅線底下，選擇產生 XXXX Stub 方法
+
+2. 同上一步，將新竹貨運與郵局的部分，都改成相依於 IShipper
+
+3. 把原本 blackcat, hsinChu, postoffice 的變數名稱，改成 shipper (重新命名可以使用 重構 > 重新命名，Ctrl+R, Ctrl+R)
+
+4. 發現不管選擇哪一家貨運商，都有同樣的一行程式碼：
+shipper.CalculateFee(product);
+
+把這一行抽出判斷式外面，把宣告IShipper放到判斷式前面
+
+5. 執行所有測試，應仍全是綠燈
+
+Code Snippet:
+    protected void btnCalculate_Click(object sender, EventArgs e)
+    {
+        if (this.IsValid)
+        {
+            var product = this.GetShippingProduct();
+
+            IShipper shipper;
+            if (this.drpCompany.SelectedValue == "1")
+            {
+                // 選擇黑貓計算運費
+                this.lblCompany.Text = "黑貓";
+                
+                shipper = new Blackcat();
+                //shipper.CalculateFee(product);
+            }
+            else if (this.drpCompany.SelectedValue == "2")
+            {
+                // 選擇新竹貨運計算運費
+                this.lblCompany.Text = "新竹貨運";
+
+                shipper = new HsinChu();
+                //shipper.CalculateFee(product);
+            }
+            else if (this.drpCompany.SelectedValue == "3")
+            {
+                // 選擇郵局計算運費
+                this.lblCompany.Text = "郵局";
+
+                shipper = new Postoffice();
+                //shipper.CalculateFee(product);
+            }
+            else
+            {
+                var js = "alert('發生不預期錯誤，請洽系統管理者');location.href='http://tw.yahoo.com/';";
+                this.ClientScript.RegisterStartupScript(this.GetType(), "back", js, true);
+            }
+
+            shipper.CalculateFee(product);
+            this.lblCharge.Text = product.ShippingFee.ToString();
+        }
+    }

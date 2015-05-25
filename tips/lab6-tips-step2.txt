@@ -1,0 +1,44 @@
+Web測試-將Selenium IDE錄製的腳本，放到測試專案中，由測試專案驅動執行測試
+
+1. 選擇 Selenium IDE 上的測試案例：計算運費
+2. 匯出 test case 成 C#/MsTest 格式：
+File > Export Test Case As... > 選擇上週建立的 C#/MsTest format template
+存成FeeTest.cs
+3. 打開 FeeTest.cs
+4. 打開 lab6 測試專案（ProductWebSiteTests）中的 CalculateFeeTests.cs
+5. 把 FeeTest.cs 的內容，貼到 CalculateFeeTests.cs 上。（記得 class 名稱改一下）
+6. 建置, 發現錯誤，Select 建置過不了
+7. 將 Select 修改成 SelectElement，建置通過
+8. 執行測試
+
+code snippet:
+[TestMethod]
+public void TheFeeTest()
+{
+	driver.Navigate().GoToUrl(baseURL + "/Product.aspx");
+	driver.FindElement(By.Id("MainContent_txtProductName")).Clear();
+	driver.FindElement(By.Id("MainContent_txtProductName")).SendKeys("book");
+	driver.FindElement(By.Id("MainContent_txtProductWeight")).Clear();
+	driver.FindElement(By.Id("MainContent_txtProductWeight")).SendKeys("10");
+	driver.FindElement(By.Id("MainContent_txtProductLength")).Clear();
+	driver.FindElement(By.Id("MainContent_txtProductLength")).SendKeys("30");
+	driver.FindElement(By.Id("MainContent_txtProductWidth")).Clear();
+	driver.FindElement(By.Id("MainContent_txtProductWidth")).SendKeys("20");
+	driver.FindElement(By.Id("MainContent_txtProductHeight")).Clear();
+	driver.FindElement(By.Id("MainContent_txtProductHeight")).SendKeys("10");
+	
+	new SelectElement(driver.FindElement(By.Id("MainContent_drpCompany"))).SelectByText("黑貓");
+	driver.FindElement(By.Id("MainContent_btnCalculate")).Click();
+	Assert.AreEqual("黑貓", driver.FindElement(By.Id("MainContent_lblCompany")).Text);
+	Assert.AreEqual("200", driver.FindElement(By.Id("MainContent_lblCharge")).Text);
+	
+	new SelectElement(driver.FindElement(By.Id("MainContent_drpCompany"))).SelectByText("新竹貨運");
+	driver.FindElement(By.Id("MainContent_btnCalculate")).Click();
+	Assert.AreEqual("新竹貨運", driver.FindElement(By.Id("MainContent_lblCompany")).Text);
+	Assert.AreEqual("254.16", driver.FindElement(By.Id("MainContent_lblCharge")).Text);
+	
+	new SelectElement(driver.FindElement(By.Id("MainContent_drpCompany"))).SelectByText("郵局");
+	driver.FindElement(By.Id("MainContent_btnCalculate")).Click();
+	Assert.AreEqual("郵局", driver.FindElement(By.Id("MainContent_lblCompany")).Text);
+	Assert.AreEqual("180", driver.FindElement(By.Id("MainContent_lblCharge")).Text);
+}

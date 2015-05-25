@@ -1,0 +1,160 @@
+重構-職責分離（主動詞分離），將商業邏輯從網站抽到 library 中
+
+1. 將 黑貓計算運費 分成 黑貓.計算運費()
+                //CalculateFeeByBlackcat(product);
+                var blackcat = new Blackcat();
+                blackcat.CalculateFee(product);
+
+2. 將新竹貨運與郵局的部分，也將主動詞分開
+                //CalculateFeeByHsinChu(product);
+                var hsinChu = new HsinChu();
+                hsinChu.CalculateFee(product);
+				
+				//CalculateFeeByPostoffice(product);
+                var postoffice = new Postoffice();
+                postoffice.CalculateFee(product);
+				
+3. 在方案中新增一個 類別庫：LogisticLib，並讓網站參考這個類別庫
+
+4. 在 new Blackcat()的下拉選單選擇，產生（熱鍵：Ctrl+.）
+選擇「產生新的類型」，類型選「class」，專案選「LogisticLib」，選擇「建立新檔案」
+
+5. new HsinChu(), new Postoffice() 同上一步，將新竹貨運與郵局的類別，產生到LogisticLib類別庫中。
+
+6. 把 ShippingProduct 的類別，與 Size 的 struct 也搬到 LogisticLib 類別庫中
+
+7. 在 blackcat.CalculateFee(product); 的CalculateFee() 下拉選單，選擇「產生xxxx方法Stub」
+
+8. 把 CalculateFeeByBlackcat() 方法內容，從網站上搬到 Blackcat 的 CalcuateFee() 裡面
+
+9. 同上兩個步驟，把網站上新竹貨運跟郵局計算運費的邏輯，放到新竹貨運與郵局的 CalculateFee() 方法中。
+
+10. 網頁應該不包含任何計算運費的邏輯，而把計算運費的職責，委託給黑貓、新竹貨運與郵局的 class 來處理。
+網頁只負責把頁面上 product 的資訊傳給它，之後拿計算完的運費，呈現到頁面上。
+
+11. 執行web測試，確保大幅重構後的結果仍正確運行
+
+12. 把不要、註解掉的程式碼刪除
+
+13. 複雜度只剩下 6 (CodeMaid Spade)
+
+code snippet:
+網頁：
+protected void btnCalculate_Click(object sender, EventArgs e)
+    {
+        if (this.IsValid)
+        {
+            var product = this.GetShippingProduct();
+
+            if (this.drpCompany.SelectedValue == "1")
+            {
+                // 選擇黑貓計算運費
+                this.lblCompany.Text = "黑貓";
+
+                //CalculateFeeByBlackcat(product);
+                var blackcat = new Blackcat();
+                blackcat.CalculateFee(product);
+            }
+            else if (this.drpCompany.SelectedValue == "2")
+            {
+                // 選擇新竹貨運計算運費
+                this.lblCompany.Text = "新竹貨運";
+                 
+                //CalculateFeeByHsinChu(product);
+                var hsinChu = new HsinChu();
+                hsinChu.CalculateFee(product);
+            }
+            else if (this.drpCompany.SelectedValue == "3")
+            {
+                // 選擇郵局計算運費
+                this.lblCompany.Text = "郵局";
+
+                //CalculateFeeByPostoffice(product);
+                var postoffice = new Postoffice();
+                postoffice.CalculateFee(product);
+            }
+            else
+            {
+                var js = "alert('發生不預期錯誤，請洽系統管理者');location.href='http://tw.yahoo.com/';";
+                this.ClientScript.RegisterStartupScript(this.GetType(), "back", js, true);
+            }
+
+            this.lblCharge.Text = product.ShippingFee.ToString();
+        }
+    }
+	
+類別庫：
+    public class Blackcat
+    {
+        public void CalculateFee(ShippingProduct product)
+        {
+            //var weight = Convert.ToDouble(this.txtProductWeight.Text);
+            var weight = product.Weight;
+            if (weight > 20)
+            {
+                //this.lblCharge.Text = "500";
+                product.ShippingFee = 500;
+            }
+            else
+            {
+                //var fee = 100 + weight * 10;
+                //this.lblCharge.Text = fee.ToString();
+                product.ShippingFee = 100 + weight * 10;
+            }
+        }
+    }
+
+    public class HsinChu
+    {
+        public void CalculateFee(ShippingProduct product)
+        {
+            //var length = Convert.ToDouble(this.txtProductLength.Text);
+            //var width = Convert.ToDouble(this.txtProductWidth.Text);
+            //var height = Convert.ToDouble(this.txtProductHeight.Text);
+
+            //var size = length * width * height;
+            var size = product.Size.Length * product.Size.Width * product.Size.Height;
+
+            //長 x 寬 x 高（公分）x 0.0000353
+            //if (length > 100 || width > 100 || height > 100)
+            if (product.Size.Length > 100 || product.Size.Width > 100 || product.Size.Height > 100)
+            {
+                //this.lblCharge.Text = (size * 0.0000353 * 1100 + 500).ToString();
+                product.ShippingFee = size * 0.0000353 * 1100 + 500;
+            }
+            else
+            {
+                //this.lblCharge.Text = (size * 0.0000353 * 1200).ToString();
+                product.ShippingFee = size * 0.0000353 * 1200;
+            }
+        }
+    }
+
+    public class Postoffice
+    {
+        public void CalculateFee(ShippingProduct product)
+        {
+            //var weight = Convert.ToDouble(this.txtProductWeight.Text);
+            var weight = product.Weight;
+            var feeByWeight = 80 + weight * 10;
+
+            //var length = Convert.ToDouble(this.txtProductLength.Text);
+            //var width = Convert.ToDouble(this.txtProductWidth.Text);
+            //var height = Convert.ToDouble(this.txtProductHeight.Text);
+            //var size = length * width * height;
+            var size = product.Size.Length * product.Size.Width * product.Size.Height;
+
+            var feeBySize = size * 0.0000353 * 1100;
+
+            if (feeByWeight < feeBySize)
+            {
+                //this.lblCharge.Text = feeByWeight.ToString();
+                product.ShippingFee = feeByWeight;
+            }
+            else
+            {
+                //this.lblCharge.Text = feeBySize.ToString();
+                product.ShippingFee = feeBySize;
+            }
+        }
+    }	

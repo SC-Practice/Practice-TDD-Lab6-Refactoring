@@ -1,0 +1,99 @@
+單元測試-為黑貓、新竹貨運、郵局建立單元測試程式
+
+1. 在Blackcat的CalculateFee()內容上，按滑鼠右鍵，選擇「Generate Unit Test」
+Output Project 選擇既存在的「ProductWebSiteTests」。 （實務上你可以把 web testing 與 unit testing 的測試專案分開）
+按下OK
+
+2. 運用3A原則，完成BlackcatTests的CalculateFeeTest()
+而測試案例的來源，就跟web testing的測試案例一樣，只是把黑貓、新竹貨運、郵局分開。
+撰寫完後，執行測試，應得到綠燈。
+
+    [TestClass()]
+    public class BlackcatTests
+    {
+        [TestMethod()]
+        public void CalculateFeeTest()
+        {
+            //arrange
+            var target = new Blackcat();
+            var product = new ShippingProduct
+            {
+                Name = "book",
+                Weight = 10,
+                Size = new Size
+                {
+                    Length = 30,
+                    Width = 20,
+                    Height = 10
+                },                
+            };
+
+            //act
+            target.CalculateFee(product);
+
+            //assert
+            var expected = 200;
+            Assert.AreEqual(expected, product.ShippingFee);
+        }
+    }
+
+3. 	同上一步，將新竹貨運與郵局的測試程式也撰寫完畢。（product初始化的部分，可以複製貼上）
+    [TestClass()]
+    public class HsinChuTests
+    {
+        [TestMethod()]
+        public void CalculateFeeTest()
+        {
+            //arrange 
+            var target = new HsinChu();
+            var product = new ShippingProduct
+            {
+                Name = "book",
+                Weight = 10,
+                Size = new Size
+                {
+                    Length = 30,
+                    Width = 20,
+                    Height = 10
+                },
+            };
+
+            //act
+            target.CalculateFee(product);
+
+            //assert
+            var expected = 254.16;
+            Assert.AreEqual(expected, product.ShippingFee);
+        }
+    }
+	
+	[TestClass()]
+    public class PostofficeTests
+    {
+        [TestMethod()]
+        public void CalculateFeeTest()
+        {
+            //arrange
+            var target = new Postoffice();
+            var product = new ShippingProduct
+            {
+                Name = "book",
+                Weight = 10,
+                Size = new Size
+                {
+                    Length = 30,
+                    Width = 20,
+                    Height = 10
+                },
+            };
+
+            //act
+            target.CalculateFee(product);
+
+            //assert
+            var expected = 180;
+            Assert.AreEqual(expected, product.ShippingFee);
+        }
+    }
+	
+4. 執行所有測試，確保全部為綠燈 (code coverage：83.33%)	

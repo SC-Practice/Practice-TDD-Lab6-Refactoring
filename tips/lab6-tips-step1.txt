@@ -1,0 +1,51 @@
+Web測試-重構前一定要有測試保護，程式碼不具可測試性，所以從粒度最大的 Web UI 測試開始建立
+
+1. 在 Firefox 上打開 Product 網頁：http://localhost:16207/Product.aspx
+2. 打開 Selenium IDE, 錄製行為
+3. 輸入商品資訊：
+商品名稱: book
+重量: 10
+長: 30
+寬: 20
+高: 10
+4. 選擇物流商，選擇：黑貓
+5. 按下計算運費
+6. 加入 Assert 物流商名稱與運費結果
+<tr>
+	<td>assertText</td>
+	<td>id=MainContent_lblCompany</td>
+	<td>黑貓</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=MainContent_lblCharge</td>
+	<td>200</td>
+</tr>
+7. 選擇物流商，選擇：新竹貨運
+8. 按下計算運費
+9. 加入 Assert 物流商名稱與運費結果
+<tr>
+	<td>assertText</td>
+	<td>id=MainContent_lblCompany</td>
+	<td>新竹貨運</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=MainContent_lblCharge</td>
+	<td>254.16</td>
+</tr>
+10. 選擇物流商，選擇：郵局
+11. 按下計算運費
+12. 加入 Assert 物流商名稱與運費結果
+<tr>
+	<td>assertText</td>
+	<td>id=MainContent_lblCompany</td>
+	<td>郵局</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>id=MainContent_lblCharge</td>
+	<td>180</td>
+</tr>
+13. 執行測試
+14. 儲存 test case: 計算運費.html

@@ -1,0 +1,285 @@
+重構-將生成物件的職責獨立出來
+
+1. 可以看到現在判斷下拉選單清單裡面的內容，只剩下兩個，分別是貨運商的名稱，以及決定 shipper 是哪一間貨運商。
+將生成物件的方法獨立出來，定義一個 GetShipper(string shipperId) 的方法，回傳 IShipper
+
+	btnCalculate_Click() 裡面
+	{
+            var product = this.GetShippingProduct();
+
+            //IShipper shipper;
+            IShipper shipper = GetShipper(this.drpCompany.SelectedValue);
+
+	}
+	
+    private IShipper GetShipper(string shipperId)
+    {
+        IShipper result = null;
+        switch (shipperId)
+        {
+            case "1":
+                result = new Blackcat();
+                break;
+            case "2":
+                result = new HsinChu();
+                break;
+            case "3":
+                result = new Postoffice();
+                break;
+            default:
+                break;
+        }
+
+        return result;
+    }
+
+2. 將原本的判斷式修改成下面的內容：
+            if (shipper != null)
+            {
+                //this.lblCompany.Text = "黑貓";                
+                shipper.CalculateFee(product);
+                this.lblCharge.Text = product.ShippingFee.ToString();
+            }
+            else
+            {
+                var js = "alert('發生不預期錯誤，請洽系統管理者');location.href='http://tw.yahoo.com/';";
+                this.ClientScript.RegisterStartupScript(this.GetType(), "back", js, true);
+            }
+			
+3. 剩下貨運商的名稱，還沒被決定。這時發現，貨運商的名稱，可以定義在 IShipper 上。因此在 IShipper 上補上一個 Name 的 property。
+
+            if (shipper != null)
+            {
+                //this.lblCompany.Text = "黑貓";     
+                this.lblCompany.Text = shipper.Name;
+                shipper.CalculateFee(product);
+                this.lblCharge.Text = product.ShippingFee.ToString();
+            }
+            else
+            {
+                var js = "alert('發生不預期錯誤，請洽系統管理者');location.href='http://tw.yahoo.com/';";
+                this.ClientScript.RegisterStartupScript(this.GetType(), "back", js, true);
+            }
+
+接著在 shipper.Name 的紅線底下，選擇產生 property 。
+
+4. 建置後會發現，三個貨運商的類別，還沒有實作 IShipper.Name。此時也發現，貨運商的名稱，其實只需要定義成唯讀，且hard-code名稱即可。
+
+因此將 IShipper 介面的 property 改成 get only：
+    public interface IShipper
+    {
+        void CalculateFee(ShippingProduct product);
+
+        //string Name { get; set; }
+        string Name { get; }
+    }
+
+並讓三個貨運商類別，實作 IShipper.Name 。（直接在 實作介面上，按下 Ctrl+. 選擇實作介面即可）
+
+黑貓的範例：
+    public class Blackcat : IShipper
+    {
+        public void CalculateFee(ShippingProduct product)
+        {
+            //var weight = Convert.ToDouble(this.txtProductWeight.Text);
+            var weight = product.Weight;
+            if (weight > 20)
+            {
+                //this.lblCharge.Text = "500";
+                product.ShippingFee = 500;
+            }
+            else
+            {
+                //var fee = 100 + weight * 10;
+                //this.lblCharge.Text = fee.ToString();
+                product.ShippingFee = 100 + weight * 10;
+            }
+        }
+
+
+        public string Name
+        {
+            get { return "黑貓"; }
+        }
+    }
+
+5. 執行所有測試，確保重構後的結果仍執行正確。
+6. 清除所有用不到的註解程式碼（此時複雜度只剩下4，程式碼跟重構前相比，變得異常乾淨好懂）
+
+code snippet:
+
+web page:
+    protected void btnCalculate_Click(object sender, EventArgs e)
+    {
+        if (this.IsValid)
+        {
+            var product = this.GetShippingProduct();
+
+            //IShipper shipper;
+            IShipper shipper = GetShipper(this.drpCompany.SelectedValue);
+
+            if (shipper != null)
+            {
+                //this.lblCompany.Text = "黑貓";     
+                this.lblCompany.Text = shipper.Name;
+                shipper.CalculateFee(product);
+                this.lblCharge.Text = product.ShippingFee.ToString();
+            }
+            else
+            {
+                var js = "alert('發生不預期錯誤，請洽系統管理者');location.href='http://tw.yahoo.com/';";
+                this.ClientScript.RegisterStartupScript(this.GetType(), "back", js, true);
+            }
+            //if (this.drpCompany.SelectedValue == "1")
+            //{
+            //    // 選擇黑貓計算運費
+            //    this.lblCompany.Text = "黑貓";
+
+            //    shipper = new Blackcat();
+            //    //shipper.CalculateFee(product);
+            //}
+            //else if (this.drpCompany.SelectedValue == "2")
+            //{
+            //    // 選擇新竹貨運計算運費
+            //    this.lblCompany.Text = "新竹貨運";
+
+            //    shipper = new HsinChu();
+            //    //shipper.CalculateFee(product);
+            //}
+            //else if (this.drpCompany.SelectedValue == "3")
+            //{
+            //    // 選擇郵局計算運費
+            //    this.lblCompany.Text = "郵局";
+
+            //    shipper = new Postoffice();
+            //    //shipper.CalculateFee(product);
+            //}
+            //else
+            //{
+            //    var js = "alert('發生不預期錯誤，請洽系統管理者');location.href='http://tw.yahoo.com/';";
+            //    this.ClientScript.RegisterStartupScript(this.GetType(), "back", js, true);
+            //}
+        }
+    }
+
+    private IShipper GetShipper(string shipperId)
+    {
+        IShipper result = null;
+        switch (shipperId)
+        {
+            case "1":
+                result = new Blackcat();
+                break;
+            case "2":
+                result = new HsinChu();
+                break;
+            case "3":
+                result = new Postoffice();
+                break;
+            default:
+                break;
+        }
+
+        return result;
+    }
+	
+LogisticLib:
+    public interface IShipper
+    {
+        void CalculateFee(ShippingProduct product);
+
+        //string Name { get; set; }
+        string Name { get; }
+    }
+
+    public class Blackcat : IShipper
+    {
+        public void CalculateFee(ShippingProduct product)
+        {
+            //var weight = Convert.ToDouble(this.txtProductWeight.Text);
+            var weight = product.Weight;
+            if (weight > 20)
+            {
+                //this.lblCharge.Text = "500";
+                product.ShippingFee = 500;
+            }
+            else
+            {
+                //var fee = 100 + weight * 10;
+                //this.lblCharge.Text = fee.ToString();
+                product.ShippingFee = 100 + weight * 10;
+            }
+        }
+
+
+        public string Name
+        {
+            get { return "黑貓"; }
+        }
+    }
+
+    public class HsinChu : IShipper
+    {
+        public void CalculateFee(ShippingProduct product)
+        {
+            //var length = Convert.ToDouble(this.txtProductLength.Text);
+            //var width = Convert.ToDouble(this.txtProductWidth.Text);
+            //var height = Convert.ToDouble(this.txtProductHeight.Text);
+
+            //var size = length * width * height;
+            var size = product.Size.Length * product.Size.Width * product.Size.Height;
+
+            //長 x 寬 x 高（公分）x 0.0000353
+            //if (length > 100 || width > 100 || height > 100)
+            if (product.Size.Length > 100 || product.Size.Width > 100 || product.Size.Height > 100)
+            {
+                //this.lblCharge.Text = (size * 0.0000353 * 1100 + 500).ToString();
+                product.ShippingFee = size * 0.0000353 * 1100 + 500;
+            }
+            else
+            {
+                //this.lblCharge.Text = (size * 0.0000353 * 1200).ToString();
+                product.ShippingFee = size * 0.0000353 * 1200;
+            }
+        }
+
+
+        public string Name
+        {
+            get { return "新竹貨運"; }
+        }
+    }
+
+    public class Postoffice : IShipper
+    {
+        public void CalculateFee(ShippingProduct product)
+        {
+            //var weight = Convert.ToDouble(this.txtProductWeight.Text);
+            var weight = product.Weight;
+            var feeByWeight = 80 + weight * 10;
+
+            //var length = Convert.ToDouble(this.txtProductLength.Text);
+            //var width = Convert.ToDouble(this.txtProductWidth.Text);
+            //var height = Convert.ToDouble(this.txtProductHeight.Text);
+            //var size = length * width * height;
+            var size = product.Size.Length * product.Size.Width * product.Size.Height;
+
+            var feeBySize = size * 0.0000353 * 1100;
+
+            if (feeByWeight < feeBySize)
+            {
+                //this.lblCharge.Text = feeByWeight.ToString();
+                product.ShippingFee = feeByWeight;
+            }
+            else
+            {
+                //this.lblCharge.Text = feeBySize.ToString();
+                product.ShippingFee = feeBySize;
+            }
+        }
+
+        public string Name
+        {
+            get { return "郵局"; }
+        }
+    }	

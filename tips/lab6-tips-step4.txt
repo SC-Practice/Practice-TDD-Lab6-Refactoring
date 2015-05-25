@@ -1,0 +1,113 @@
+重構-擷取方法
+
+1. 針對「黑貓計算運費」的邏輯部分，選取後按滑鼠右鍵，選擇重構>擷取方法(Ctrl+R, Ctrl+M) => 記憶 Refactor -> extract Method
+方法命名應與註解相同：CalculateFeeByBlackcat(product)
+
+2. 同樣的方式，針對新竹貨運與郵局計算運費的邏輯部分，重構>擷取方法 
+產生 CalculateFeeByHsinChu(product) 與 CalculateFeeByPostoffice(product)
+
+3. 執行測試，確保程式碼仍如同預期般運作
+
+code snippet:
+    protected void btnCalculate_Click(object sender, EventArgs e)
+    {
+        if (this.IsValid)
+        {
+            var product = this.GetShippingProduct();
+
+            if (this.drpCompany.SelectedValue == "1")
+            {
+                // 選擇黑貓計算運費
+                this.lblCompany.Text = "黑貓";
+
+                CalculateFeeByBlackcat(product);
+            }
+            else if (this.drpCompany.SelectedValue == "2")
+            {
+                // 選擇新竹貨運計算運費
+                this.lblCompany.Text = "新竹貨運";
+				
+                CalculateFeeByHsinChu(product);
+            }
+            else if (this.drpCompany.SelectedValue == "3")
+            {
+                // 選擇郵局計算運費
+                this.lblCompany.Text = "郵局";
+
+                CalculateFeeByPostoffice(product);
+            }
+            else
+            {
+                var js = "alert('發生不預期錯誤，請洽系統管理者');location.href='http://tw.yahoo.com/';";
+                this.ClientScript.RegisterStartupScript(this.GetType(), "back", js, true);
+            }
+
+            this.lblCharge.Text = product.ShippingFee.ToString();
+        }
+    }
+
+    private static void CalculateFeeByPostoffice(ShippingProduct product)
+    {
+        //var weight = Convert.ToDouble(this.txtProductWeight.Text);
+        var weight = product.Weight;
+        var feeByWeight = 80 + weight * 10;
+
+        //var length = Convert.ToDouble(this.txtProductLength.Text);
+        //var width = Convert.ToDouble(this.txtProductWidth.Text);
+        //var height = Convert.ToDouble(this.txtProductHeight.Text);
+        //var size = length * width * height;
+        var size = product.Size.Length * product.Size.Width * product.Size.Height;
+
+        var feeBySize = size * 0.0000353 * 1100;
+
+        if (feeByWeight < feeBySize)
+        {
+            //this.lblCharge.Text = feeByWeight.ToString();
+            product.ShippingFee = feeByWeight;
+        }
+        else
+        {
+            //this.lblCharge.Text = feeBySize.ToString();
+            product.ShippingFee = feeBySize;
+        }
+    }
+
+    private static void CalculateFeeByHsinChu(ShippingProduct product)
+    {
+        //var length = Convert.ToDouble(this.txtProductLength.Text);
+        //var width = Convert.ToDouble(this.txtProductWidth.Text);
+        //var height = Convert.ToDouble(this.txtProductHeight.Text);
+
+        //var size = length * width * height;
+        var size = product.Size.Length * product.Size.Width * product.Size.Height;
+
+        //長 x 寬 x 高（公分）x 0.0000353
+        //if (length > 100 || width > 100 || height > 100)
+        if (product.Size.Length > 100 || product.Size.Width > 100 || product.Size.Height > 100)
+        {
+            //this.lblCharge.Text = (size * 0.0000353 * 1100 + 500).ToString();
+            product.ShippingFee = size * 0.0000353 * 1100 + 500;
+        }
+        else
+        {
+            //this.lblCharge.Text = (size * 0.0000353 * 1200).ToString();
+            product.ShippingFee = size * 0.0000353 * 1200;
+        }
+    }
+
+    private static void CalculateFeeByBlackcat(ShippingProduct product)
+    {
+        //var weight = Convert.ToDouble(this.txtProductWeight.Text);
+        var weight = product.Weight;
+        if (weight > 20)
+        {
+            //this.lblCharge.Text = "500";
+            product.ShippingFee = 500;
+        }
+        else
+        {
+            //var fee = 100 + weight * 10;
+            //this.lblCharge.Text = fee.ToString();
+            product.ShippingFee = 100 + weight * 10;
+        }
+    }
