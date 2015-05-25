@@ -2,7 +2,7 @@
 
 /** 重構之路* */
 /* 1.使用 Selelium IDE, 在 CalculateFeeTest.cs 建立 UnitTest -> run test: green! */
-/* 2.建立 ViewModel 抽離 .aspx.cs & .aspx 相依性 -> run test: green! */
+/* 2.建立 ViewModel 類別, 增加 .aspx.cs & .aspx 之間的彈性 -> run test: green! Complexity:14*/
 
 public partial class Product : System.Web.UI.Page
 {
@@ -12,61 +12,62 @@ public partial class Product : System.Web.UI.Page
 
     protected void btnCalculate_Click(object sender, EventArgs e)
     {
+        var product = this.GetShippingProduct();
         if (this.IsValid)
         {
             if (this.drpCompany.SelectedValue == "1")
             {
                 this.lblCompany.Text = "黑貓";
-                var weight = Convert.ToDouble(this.txtProductWeight.Text);
+                var weight = product.Weight;
                 if (weight > 20)
                 {
-                    this.lblCharge.Text = "500";
+                    product.ShippingFee = 500;
                 }
                 else
                 {
                     var fee = 100 + weight * 10;
-                    this.lblCharge.Text = fee.ToString();
+                    product.ShippingFee = fee;
                 }
             }
             else if (this.drpCompany.SelectedValue == "2")
             {
                 this.lblCompany.Text = "新竹貨運";
-                var length = Convert.ToDouble(this.txtProductLength.Text);
-                var width = Convert.ToDouble(this.txtProductWidth.Text);
-                var height = Convert.ToDouble(this.txtProductHeight.Text);
+                var length = product.Size.Length;
+                var width = product.Size.Width;
+                var height = product.Size.Height;
 
                 var size = length * width * height;
 
                 //長 x 寬 x 高（公分）x 0.0000353
                 if (length > 100 || width > 100 || height > 100)
                 {
-                    this.lblCharge.Text = (size * 0.0000353 * 1100 + 500).ToString();
+                    product.ShippingFee = size * 0.0000353 * 1100 + 500;
                 }
                 else
                 {
-                    this.lblCharge.Text = (size * 0.0000353 * 1200).ToString();
+                    product.ShippingFee = size * 0.0000353 * 1200;
                 }
             }
             else if (this.drpCompany.SelectedValue == "3")
             {
                 this.lblCompany.Text = "郵局";
 
-                var weight = Convert.ToDouble(this.txtProductWeight.Text);
+                var weight = product.Weight;
                 var feeByWeight = 80 + weight * 10;
 
-                var length = Convert.ToDouble(this.txtProductLength.Text);
-                var width = Convert.ToDouble(this.txtProductWidth.Text);
-                var height = Convert.ToDouble(this.txtProductHeight.Text);
+                var length = product.Size.Length;
+                var width = product.Size.Width;
+                var height = product.Size.Height;
                 var size = length * width * height;
                 var feeBySize = size * 0.0000353 * 1100;
 
                 if (feeByWeight < feeBySize)
                 {
-                    this.lblCharge.Text = feeByWeight.ToString();
+                    product.ShippingFee = feeByWeight;
                 }
                 else
                 {
-                    this.lblCharge.Text = feeBySize.ToString();
+                    product.ShippingFee = feeBySize;
                 }
             }
             else
@@ -74,6 +75,8 @@ public partial class Product : System.Web.UI.Page
                 var js = "alert('發生不預期錯誤，請洽系統管理者');location.href='http://tw.yahoo.com/';";
                 this.ClientScript.RegisterStartupScript(this.GetType(), "back", js, true);
             }
+
+            this.lblCharge.Text = product.ShippingFee.ToString();
         }
     }
 

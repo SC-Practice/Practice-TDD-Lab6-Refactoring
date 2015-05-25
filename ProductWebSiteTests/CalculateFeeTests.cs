@@ -57,7 +57,7 @@ namespace ProductWebSiteTests
             driver.FindElement(By.Id("MainContent_txtProductHeight")).SendKeys("10");
             driver.FindElement(By.Id("MainContent_drpCompany")).Click();
             new SelectElement(driver.FindElement(By.Id("MainContent_drpCompany"))).SelectByText("黑貓");
-            driver.FindElement(By.CssSelector("option[value=\"1\"]")).Click();
+            //driver.FindElement(By.CssSelector("option[value=\"1\"]")).Click();
             driver.FindElement(By.Id("MainContent_btnCalculate")).Click();
             Assert.AreEqual("黑貓", driver.FindElement(By.Id("MainContent_lblCompany")).Text);
             Assert.AreEqual("200", driver.FindElement(By.Id("MainContent_lblCharge")).Text);
