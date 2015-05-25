@@ -1,7 +1,8 @@
 ﻿using System;
 
 /** 重構之路* */
-/* 1.使用 Selelium IDE, 在 CalculateFeeTest.cs 建立 UnitTest */
+/* 1.使用 Selelium IDE, 在 CalculateFeeTest.cs 建立 UnitTest -> run test: green! */
+/* 2.建立 ViewModel 抽離 .aspx.cs & .aspx 相依性 -> run test: green! */
 
 public partial class Product : System.Web.UI.Page
 {
@@ -75,4 +76,44 @@ public partial class Product : System.Web.UI.Page
             }
         }
     }
+
+    private ShippingProduct GetShippingProduct()
+    {
+        var result = new ShippingProduct
+        {
+            Name = this.txtProductName.Text,
+            Weight = Convert.ToDouble(this.txtProductWeight.Text),
+            Size = new Size
+            {
+                Length = Convert.ToDouble(this.txtProductLength.Text),
+                Width = Convert.ToDouble(this.txtProductWidth.Text),
+                Height = Convert.ToDouble(this.txtProductHeight.Text)
+            },
+            Shipper = Convert.ToInt32(this.drpCompany.SelectedValue)
+        };
+
+        return result;
+    }
+}
+
+public class ShippingProduct
+{
+    public string Name { get; set; }
+
+    public double Weight { get; set; }
+
+    public Size Size { get; set; }
+
+    public int Shipper { get; set; }
+
+    public double ShippingFee { get; set; }
+}
+
+public struct Size
+{
+    public double Length { get; set; }
+
+    public double Width { get; set; }
+
+    public double Height { get; set; }
 }
