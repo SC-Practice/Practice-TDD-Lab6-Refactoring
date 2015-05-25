@@ -1,6 +1,6 @@
 ﻿namespace LogisticLib
 {
-    public class HsinChu
+    public class HsinChu : IShipping
     {
         public void CalculateFee(ShippingProduct product)
         {

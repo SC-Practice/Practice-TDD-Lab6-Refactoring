@@ -1,6 +1,6 @@
 ﻿namespace LogisticLib
 {
-    public class Blackcat
+    public class Blackcat : IShipping
     {
         public void CalculateFee(ShippingProduct product)
         {

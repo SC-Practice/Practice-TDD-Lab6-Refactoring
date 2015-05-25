@@ -1,6 +1,6 @@
 ﻿namespace LogisticLib
 {
-    public class Postoffice
+    public class Postoffice : IShipping
     {
         public void CalculateFee(ShippingProduct product)
         {
