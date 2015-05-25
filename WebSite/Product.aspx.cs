@@ -1,6 +1,7 @@
 ﻿using System;
 
-/*重構程式碼*/
+/** 重構之路* */
+/* 1.使用 Selelium IDE, 在 CalculateFeeTest.cs 建立 UnitTest */
 
 public partial class Product : System.Web.UI.Page
 {
